@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final int RC_SIGN_IN = 123;
+    private static final String TAG = MainActivity.class.getSimpleName();
     private MainActivityViewModel mViewModel;
 
     @Override
@@ -39,8 +41,9 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                    Intent intent = new Intent(MainActivity.this, AskActivity.class);
-                    startActivity(intent);
+                Intent intent = new Intent(MainActivity.this, AskActivity.class);
+                Log.i(TAG, "This button was clicked");
+                startActivity(intent);
             }
         });
 
@@ -60,7 +63,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        if(shouldStartSignIn()){
+        if (shouldStartSignIn()) {
             startSignIn();
             return;
         }
@@ -70,7 +73,7 @@ public class MainActivity extends AppCompatActivity
         return (!mViewModel.isSigningIn() && FirebaseAuth.getInstance().getCurrentUser() == null);
     }
 
-    private void startSignIn(){
+    private void startSignIn() {
         //sign in with firebase ui
         Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
                 .setAvailableProviders(Collections.singletonList(
@@ -84,9 +87,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == RC_SIGN_IN){
+        if (requestCode == RC_SIGN_IN) {
             mViewModel.setSigningIn(false);
-            if(resultCode != RESULT_OK && shouldStartSignIn()){
+            if (resultCode != RESULT_OK && shouldStartSignIn()) {
                 startSignIn();
             }
         }
@@ -115,7 +118,7 @@ public class MainActivity extends AppCompatActivity
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.action_logout:
                 AuthUI.getInstance().signOut(this);
                 startSignIn();
@@ -148,7 +151,6 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
 
 
 }

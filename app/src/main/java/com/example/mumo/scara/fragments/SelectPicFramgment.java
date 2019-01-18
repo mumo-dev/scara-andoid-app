@@ -28,6 +28,7 @@ public class SelectPicFramgment extends BottomSheetDialogFragment {
     private TextView mLauchCameraButton;
     private TextView mSelectPicfromGallery;
     public static final int REQUEST_GET_PHOTO = 12;
+    public static final int REQUEST_IMAGE_CAPTURE = 12;
 
     OnSelectedImageListener dataPasser;
 
