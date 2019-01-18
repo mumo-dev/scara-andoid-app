@@ -1,6 +1,9 @@
 package com.example.mumo.scara;
 
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -13,8 +16,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.mumo.scara.viewmodel.MainActivityViewModel;
+import com.firebase.ui.auth.AuthUI;
+import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.Collections;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private static final int RC_SIGN_IN = 123;
+    private MainActivityViewModel mViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,12 +52,51 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        mViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(shouldStartSignIn()){
+            startSignIn();
+            return;
+        }
+    }
+
+    private boolean shouldStartSignIn() {
+        return (!mViewModel.isSigningIn() && FirebaseAuth.getInstance().getCurrentUser() == null);
+    }
+
+    private void startSignIn(){
+        //sign in with firebase ui
+        Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
+                .setAvailableProviders(Collections.singletonList(
+                        new AuthUI.IdpConfig.EmailBuilder().build()))
+                .setIsSmartLockEnabled(true)
+                .build();
+        startActivityForResult(intent, RC_SIGN_IN);
+        mViewModel.setSigningIn(true);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == RC_SIGN_IN){
+            mViewModel.setSigningIn(false);
+            if(resultCode != RESULT_OK && shouldStartSignIn()){
+                startSignIn();
+            }
+        }
     }
 
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer.isDrawerOpen(GravityCompat.
+                START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
@@ -64,13 +115,12 @@ public class MainActivity extends AppCompatActivity
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()){
+            case R.id.action_logout:
+                AuthUI.getInstance().signOut(this);
+                startSignIn();
+                break;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -98,4 +148,7 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+
+
 }
