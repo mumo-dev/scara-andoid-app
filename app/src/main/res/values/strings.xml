@@ -10,7 +10,7 @@
     <string name="question_title">Type your question here, I will help you find the best answer</string>
     <string name="question_hint">Question...</string>
     <string name="select_question_category">Select question category</string>
-    <string name="add_photo_option">Add Photo(Option)</string>
+    <string name="add_photo_option">Add Photo(Optional)</string>
     <string name="add_tags">Add Tags</string>
 
     <string-array name="categories">

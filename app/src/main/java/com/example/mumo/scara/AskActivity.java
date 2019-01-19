@@ -4,6 +4,8 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -24,7 +26,7 @@ import com.example.mumo.scara.fragments.SelectPicFramgment;
 
 import java.io.File;
 
-public class AskActivity extends AppCompatActivity implements SelectPicFramgment.OnSelectedImageListener {
+public class AskActivity extends AppCompatActivity implements SelectPicFramgment.OnSelectedImageListener{
 
     private static final String TAG = AskActivity.class.getSimpleName();
     private static final int PERMISSION_WRITE_EXTERNAL_STORAGE = 56;
@@ -34,8 +36,8 @@ public class AskActivity extends AppCompatActivity implements SelectPicFramgment
     private ImageView mPhotoRemove;
     private String uploadedImagePath;
 
-    private boolean isCameraPermissionGranted=false;
-    private boolean isWritePermissionGranted=false;
+    private boolean isCameraPermissionGranted = false;
+    private boolean isWritePermissionGranted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,17 +61,17 @@ public class AskActivity extends AppCompatActivity implements SelectPicFramgment
                         // this thread waiting for the user's response! After the user
                         // sees the explanation, try again to request the permission.
                     } else {*/
-                        // No explanation needed; request the permission
-                        ActivityCompat.requestPermissions(AskActivity.this,
-                                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                PERMISSION_WRITE_EXTERNAL_STORAGE);
+                    // No explanation needed; request the permission
+                    ActivityCompat.requestPermissions(AskActivity.this,
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            PERMISSION_WRITE_EXTERNAL_STORAGE);
 //                    }
                 } else {
 
                     //write external storage permission  already granted
                     //check camera permission
-                    if(ContextCompat.checkSelfPermission(AskActivity.this,
-                            Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+                    if (ContextCompat.checkSelfPermission(AskActivity.this,
+                            Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                         //camera permission denied
                        /* if(ActivityCompat.shouldShowRequestPermissionRationale(AskActivity.this,
                                 Manifest.permission.CAMERA)){
@@ -77,12 +79,12 @@ public class AskActivity extends AppCompatActivity implements SelectPicFramgment
                             // this thread waiting for the user's response! After the user
                             // sees the explanation, try again to request the permission.
                         }else {*/
-                            ActivityCompat.requestPermissions(AskActivity.this,
-                                    new String[]{Manifest.permission.CAMERA},
-                                    PERMISSION_ACCESS_CAMERA);
+                        ActivityCompat.requestPermissions(AskActivity.this,
+                                new String[]{Manifest.permission.CAMERA},
+                                PERMISSION_ACCESS_CAMERA);
 //                        }
 
-                    }else {
+                    } else {
                         //both permissions have been granted..proceed
                         SelectPicFramgment selectPicFramgment = new SelectPicFramgment();
                         selectPicFramgment.show(getSupportFragmentManager(), selectPicFramgment.getTag());
@@ -95,14 +97,15 @@ public class AskActivity extends AppCompatActivity implements SelectPicFramgment
 
         mPhotoImageView = findViewById(R.id.photo_image_view);
         mPhotoRemove = findViewById(R.id.photo_image_remove);
-//        mPhotoRemove.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                mPhotoImageView.setVisibility(View.GONE);
-//                mPhotoRemove.setVisibility(View.GONE);
-//                uploadedImagePath = null;
-//            }
-//        });
+        mPhotoRemove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPhotoImageView.setImageDrawable(null);
+                mPhotoImageView.setVisibility(View.GONE);
+                mPhotoRemove.setVisibility(View.GONE);
+                uploadedImagePath = null;
+            }
+        });
 
 
     }
@@ -126,41 +129,44 @@ public class AskActivity extends AppCompatActivity implements SelectPicFramgment
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode){
+        switch (requestCode) {
             case PERMISSION_WRITE_EXTERNAL_STORAGE:
-                if(grantResults.length > 0 && grantResults[0]== PackageManager.PERMISSION_GRANTED){
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     isWritePermissionGranted = true;
-                }else {
+                } else {
                     Toast.makeText(AskActivity.this,
-                            "Enable app read device storage permission",Toast.LENGTH_LONG).show();
+                            "Enable app read device storage permission", Toast.LENGTH_LONG).show();
                 }
                 break;
             case PERMISSION_ACCESS_CAMERA:
-                if(grantResults.length > 0 && grantResults[0]== PackageManager.PERMISSION_GRANTED){
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     isCameraPermissionGranted = true;
-                }else {
+                } else {
                     Toast.makeText(AskActivity.this,
-                            "Enable app read device storage permission",Toast.LENGTH_LONG).show();
+                            "Enable app read device storage permission", Toast.LENGTH_LONG).show();
                 }
                 break;
 
         }
 
-        if(isWritePermissionGranted && isCameraPermissionGranted){
+        if (isWritePermissionGranted && isCameraPermissionGranted) {
             SelectPicFramgment selectPicFramgment = new SelectPicFramgment();
             selectPicFramgment.show(getSupportFragmentManager(), selectPicFramgment.getTag());
         }
     }
 
     @Override
-    public void onSelectImage(String path) {
-        uploadedImagePath = path;
-
-        bindSelectedImageToView();
+    public void onSelectImage(String path, boolean fromCamera) {
+        if(!fromCamera) {
+            uploadedImagePath = path;
+            bindSelectedImageToView();
+        }else {
+            setPic(path);
+        }
 
     }
 
-    private void bindSelectedImageToView(){
+    private void bindSelectedImageToView() {
         mPhotoImageView.setVisibility(View.VISIBLE);
         mPhotoRemove.setVisibility(View.VISIBLE);
         Uri photoUri = Uri.fromFile(new File(uploadedImagePath));
@@ -168,5 +174,31 @@ public class AskActivity extends AppCompatActivity implements SelectPicFramgment
                 .load(photoUri)
                 .into(mPhotoImageView);
 
+    }
+
+    private void setPic(String photoPath) {
+        mPhotoImageView.setVisibility(View.VISIBLE);
+        mPhotoRemove.setVisibility(View.VISIBLE);
+        // Get the dimensions of the View
+//        int targetW = mPhotoImageView.getWidth();
+//        int targetH = mPhotoImageView.getHeight();
+
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(photoPath, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW/100, photoH/100);
+
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(photoPath, bmOptions);
+        mPhotoImageView.setImageBitmap(bitmap);
     }
 }
