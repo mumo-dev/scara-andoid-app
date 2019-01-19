@@ -191,7 +191,7 @@ public class AskActivity extends AppCompatActivity implements SelectPicFramgment
                 mPhotoImageView.setImageDrawable(null);
                 mPhotoImageView.setVisibility(View.GONE);
                 mPhotoRemove.setVisibility(View.GONE);
-                
+
                 if (task.isSuccessful()) {
                     Uri downloadUri = task.getResult();
                     if (downloadUri != null) {
