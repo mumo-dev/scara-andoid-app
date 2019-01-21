@@ -25,4 +25,11 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="ask">ask</string>
+    <string name="question_hinr">
+        Scale invariant blob detector solution code
+        Adapted by Svetlana Lazebnik and Josef Sivic based on code by Serhat Tekin
+        UNC Chapel Hill, COMP 776 (Spring 2008)
+        ENS Paris, Object recognition and Computer Vision (Fall 2009)
+    </string>
+    <string name="error_fetching_data">Error fetching data. Try again !!!</string>
 </resources>

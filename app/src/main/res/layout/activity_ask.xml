@@ -12,19 +12,28 @@
         android:layout_height="wrap_content"
         android:padding="16dp"
         android:orientation="vertical">
-        <ProgressBar
-            android:id="@+id/pg_indeterminate"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="6dp"
-            android:indeterminate="true"
-            />
+       <RelativeLayout
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content">
+           <ImageView
+               android:id="@+id/user_icon"
+               android:layout_width="40dp"
+               android:layout_height="40dp"
+               android:src="@drawable/ic_account"
+               android:tint="@color/colorPrimary"/>
+           <TextView
+               android:id="@+id/tv_username_label"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:text="UserName"
+               android:textAppearance="@style/TextAppearance.AppCompat.Large"
+               android:layout_toEndOf="@+id/user_icon"
+               android:paddingLeft="10dp"
+               android:paddingTop="5dp"
+           />
+       </RelativeLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/question_title"
-            android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+
 
         <EditText
             android:id="@+id/et_question"

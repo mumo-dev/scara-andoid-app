@@ -74,6 +74,11 @@ public class AskActivity extends AppCompatActivity implements SelectPicFramgment
         //ask for the necessary permission or quit
         checkPermissions();
 
+        TextView textView = findViewById(R.id.tv_username_label);
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        final String username = user != null ? user.getDisplayName() : "Anonymous";
+        textView.setText(username);
+
         editTextQuestion = findViewById(R.id.et_question);
         mCategorySpinner = findViewById(R.id.sp_category);
         mSubmitButton = findViewById(R.id.btn_submit);
@@ -126,9 +131,8 @@ public class AskActivity extends AppCompatActivity implements SelectPicFramgment
                     */
                 }
                 //create a Question Object
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                String username = user != null ? user.getDisplayName() : "Anonymous";
-                Question q = new Question(question, username, category, 0, imageUrl, new Date());
+
+                Question q = new Question(question, username, category, 0, imageUrl, 0, new Date().getTime());
                 uploadDataToFirebase(q);
             }
         });
@@ -137,39 +141,32 @@ public class AskActivity extends AppCompatActivity implements SelectPicFramgment
     }
 
     private void uploadDataToFirebase(Question q) {
-        mSubmitButton.setText("Sending...");
         mSubmitButton.setEnabled(false);
         questionCollectionRef.add(q)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
-                        resetUI();
+
                         Toast.makeText(AskActivity.this, "Question Uploaded successfully", Toast.LENGTH_LONG).show();
-//                        finish();
+                        finish();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                resetUI();
+
                 e.printStackTrace();
                 Toast.makeText(AskActivity.this, "uploadTask failed " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
 
-    private void resetUI() {
-        mSubmitButton.setText("ASK");
-        mSubmitButton.setEnabled(true);
-        editTextQuestion.setText("");
-    }
 
     private void uploadImageToServer(String name) {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageReference = storage.getReference();
-        final StorageReference ref = storageReference.child("images/" + name);
+        final StorageReference ref = storageReference.child("images/" + name + ".jpg");
 
-        mSubmitButton.setText("Sending...");
-        mSubmitButton.setEnabled(false);
+
 //        final String urlImage;
         Bitmap bitmap = ((BitmapDrawable) mPhotoImageView.getDrawable()).getBitmap();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -187,10 +184,7 @@ public class AskActivity extends AppCompatActivity implements SelectPicFramgment
         }).addOnCompleteListener(new OnCompleteListener<Uri>() {
             @Override
             public void onComplete(@NonNull Task<Uri> task) {
-                resetUI();
-                mPhotoImageView.setImageDrawable(null);
-                mPhotoImageView.setVisibility(View.GONE);
-                mPhotoRemove.setVisibility(View.GONE);
+
 
                 if (task.isSuccessful()) {
                     Uri downloadUri = task.getResult();

@@ -1,6 +1,7 @@
 package com.example.mumo.scara.model;
 
 import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.Date;
 
@@ -10,18 +11,20 @@ public class Question {
     private String username;
     private String category;
     private int votes;
+    private int answers;
     private String imageReference;
-    private Date createdAt;
+    private long createdAt;
 
     public Question() {}
 
-    public Question(String text, String username, String category, int votes, String url, Date createdAt) {
+    public Question(String text, String username, String category, int votes, String url, int answers, long createdAt) {
         this.text = text;
         this.username = username;
         this.category = category;
         this.votes = votes;
         this.imageReference = url;
         this.createdAt = createdAt;
+        this.answers =answers;
     }
 
     @Exclude
@@ -73,11 +76,19 @@ public class Question {
         this.imageReference = imageReference;
     }
 
-    public Date getCreatedAt() {
+    public long getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(long createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public int getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(int answers) {
+        this.answers = answers;
     }
 }

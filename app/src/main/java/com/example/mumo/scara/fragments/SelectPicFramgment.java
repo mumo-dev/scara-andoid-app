@@ -41,7 +41,6 @@ public class SelectPicFramgment extends BottomSheetDialogFragment {
     public static final int REQUEST_GET_PHOTO = 15;
     public static final int REQUEST_IMAGE_CAPTURE = 12;
 
-    private ImageView imageView;
     String mCurrentPhotoPath;
 
 
@@ -75,9 +74,6 @@ public class SelectPicFramgment extends BottomSheetDialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable final ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.select_pic_dialog, container, false);
-
-        imageView = view.findViewById(R.id.uploadedImage);
-//        imageView.setVisibility(View.GONE);
 
         mLauchCameraButton = view.findViewById(R.id.tv_take_picture);
         mLauchCameraButton.setOnClickListener(new View.OnClickListener() {

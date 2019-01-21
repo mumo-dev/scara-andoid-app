@@ -1,11 +1,15 @@
 package com.example.mumo.scara;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.arch.paging.PagedList;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -16,10 +20,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageButton;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
+import com.example.mumo.scara.adapter.FirestorePagingQuetionAdapter;
+import com.example.mumo.scara.model.Question;
 import com.example.mumo.scara.viewmodel.MainActivityViewModel;
 import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.firestore.paging.FirestorePagingOptions;
+import com.firebase.ui.firestore.paging.LoadingState;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.util.Collections;
 
@@ -29,6 +42,13 @@ public class MainActivity extends AppCompatActivity
     private static final int RC_SIGN_IN = 123;
     private static final String TAG = MainActivity.class.getSimpleName();
     private MainActivityViewModel mViewModel;
+
+    private FirebaseFirestore mFirestore;
+
+    private RecyclerView mQuestionRecyclerView;
+    private TextView mErrorTextView;
+    private ImageButton mRetryButton;
+    private ProgressBar mLoadingIndicator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +77,73 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         mViewModel = ViewModelProviders.of(this).get(MainActivityViewModel.class);
+
+        mFirestore = FirebaseFirestore.getInstance();
+
+        final Query query = mFirestore.collection("questions")
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+               .limit(50);
+
+        final PagedList.Config  config = new PagedList.Config.Builder()
+                .setEnablePlaceholders(false)
+                .setPrefetchDistance(10)
+                .setPageSize(20)
+                .build();
+
+        final FirestorePagingOptions<Question> options = new FirestorePagingOptions.Builder <Question>()
+                .setLifecycleOwner(this)
+                .setQuery(query,config, Question.class)
+                .build();
+
+        mQuestionRecyclerView = findViewById(R.id.question_recylerview);
+        mErrorTextView = findViewById(R.id.tv_error_loading);
+        mLoadingIndicator = findViewById(R.id.pg_loading_indicator);
+        mRetryButton = findViewById(R.id.retry_button);
+
+        mQuestionRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        final FirestorePagingQuetionAdapter adapter = new FirestorePagingQuetionAdapter(options, this){
+            @Override
+            protected void onLoadingStateChanged(@NonNull LoadingState state) {
+                switch (state) {
+                    case LOADING_INITIAL:
+                        // The initial load has begun
+                        // ...
+                        mLoadingIndicator.setVisibility(View.VISIBLE);
+                        mErrorTextView.setVisibility(View.GONE);
+                        mRetryButton.setVisibility(View.GONE);
+                        mQuestionRecyclerView.setVisibility(View.GONE);
+                    case LOADING_MORE:
+                        // The adapter has started to load an additional page
+                        // ...
+                        mLoadingIndicator.setVisibility(View.VISIBLE);
+                        mErrorTextView.setVisibility(View.GONE);
+                        mRetryButton.setVisibility(View.GONE);
+                        mQuestionRecyclerView.setVisibility(View.VISIBLE);
+                    case LOADED:
+                        // The previous load (either initial or additional) completed
+                        // ...
+                        mLoadingIndicator.setVisibility(View.GONE);
+                        mQuestionRecyclerView.setVisibility(View.VISIBLE);
+                        mLoadingIndicator.setVisibility(View.GONE);
+                        mErrorTextView.setVisibility(View.GONE);
+                        mRetryButton.setVisibility(View.GONE);
+
+                    case ERROR:
+                        // The previous load (either initial or additional) failed. Call
+                        // the retry() method in order to retry the load operation.
+                        // ...
+//                        mLoadingIndicator.setVisibility(View.GONE);
+//                        mErrorTextView.setVisibility(View.VISIBLE);
+//                        mRetryButton.setVisibility(View.VISIBLE);
+//                        mQuestionRecyclerView.setVisibility(View.VISIBLE);
+//                        this.retry();
+
+                }
+            }
+        };
+        mQuestionRecyclerView.setAdapter(adapter);
+
     }
 
 
