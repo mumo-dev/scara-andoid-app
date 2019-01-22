@@ -8,23 +8,39 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
+
 import com.example.mumo.scara.GlideApp;
 import com.example.mumo.scara.R;
 import com.example.mumo.scara.model.Question;
 import com.firebase.ui.firestore.paging.FirestorePagingAdapter;
 import com.firebase.ui.firestore.paging.FirestorePagingOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
+import java.util.List;
 
 public class FirestorePagingQuetionAdapter extends FirestorePagingAdapter<Question, FirestorePagingQuetionAdapter.QuestionViewHolder> {
 
     private Context mContext;
 
-    public FirestorePagingQuetionAdapter(@NonNull FirestorePagingOptions<Question> options, Context context) {
+    OnImageClickListener imageClickListener;
+
+    public interface OnImageClickListener {
+        void openImageFullScreenDialog(String imageRef);
+    }
+
+    public FirestorePagingQuetionAdapter(@NonNull FirestorePagingOptions<Question> options, Context context,
+                                         OnImageClickListener listener) {
         super(options);
         mContext = context;
+        imageClickListener = listener;
     }
 
     @Override
@@ -49,6 +65,9 @@ public class FirestorePagingQuetionAdapter extends FirestorePagingAdapter<Questi
         private TextView mQuestionAnswers;
         private TextView mQuestionVotes;
 
+        private boolean mHasVoted;
+        private int mCurrentVotes;
+
         public QuestionViewHolder(@NonNull View itemView) {
             super(itemView);
             mUserPhotoIcon = itemView.findViewById(R.id.imv_user_icon);
@@ -61,21 +80,67 @@ public class FirestorePagingQuetionAdapter extends FirestorePagingAdapter<Questi
 
         }
 
-        public void bind(Question question) {
+        public void bind(final Question question) {
+
+            final String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            List<String> votes = question.getVotes();
+
+            mHasVoted = votes.contains(userId);
+            mCurrentVotes = votes.size();
+
             mUserNameTxtView.setText(question.getUsername());
             mQuestionTxtView.setText(question.getText());
             mQuestionAnswers.setText(question.getAnswers() + " Answers");
-            mQuestionVotes.setText(question.getVotes() + " votes");
+            mQuestionVotes.setText(mCurrentVotes + " votes");
 
-            if(question.getImageReference().length() != 0 || question.getImageReference() != null ) {
-                StorageReference storageReference = FirebaseStorage.getInstance()
+
+
+            if (question.getImageReference().length() != 0 || question.getImageReference() != null) {
+                mQuestionPhoto.setVisibility(View.VISIBLE);
+
+                final StorageReference storageReference = FirebaseStorage.getInstance()
                         .getReference("images/" + question.getImageReference() + ".jpg");
 
                 GlideApp.with(mContext)
                         .load(storageReference)
                         .into(mQuestionPhoto);
 
+                mQuestionPhoto.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        imageClickListener.openImageFullScreenDialog("images/" + question.getImageReference() + ".jpg");
+                    }
+                });
+
+
+
             }
+
+            mQuestionVotes.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    vote( question.getQuestionId(), userId, mHasVoted);
+
+                }
+            });
+        }
+
+        private void vote(String questionId, String userId, boolean hasVoted) {
+            FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+            DocumentReference docRef = firestore.collection("questions").document(questionId);
+
+            if (!hasVoted) {
+                docRef.update("votes", FieldValue.arrayUnion(userId));
+                mCurrentVotes++;
+                mQuestionVotes.setText(mCurrentVotes + " votes");
+                mHasVoted = true;
+            } else {
+                docRef.update("votes", FieldValue.arrayRemove(userId));
+                mCurrentVotes--;
+                mQuestionVotes.setText(mCurrentVotes + " votes");
+                mHasVoted = false;
+            }
+
         }
     }
 }

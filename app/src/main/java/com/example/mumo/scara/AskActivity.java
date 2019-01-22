@@ -45,6 +45,7 @@ import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
@@ -132,7 +133,7 @@ public class AskActivity extends AppCompatActivity implements SelectPicFramgment
                 }
                 //create a Question Object
 
-                Question q = new Question(question, username, category, 0, imageUrl, 0, new Date().getTime());
+                Question q = new Question(question, username, category, imageUrl, new ArrayList<String>(),0, new Date().getTime());
                 uploadDataToFirebase(q);
             }
         });

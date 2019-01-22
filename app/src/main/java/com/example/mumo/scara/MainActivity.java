@@ -8,6 +8,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -23,21 +25,26 @@ import android.view.MenuItem;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mumo.scara.adapter.FirestorePagingQuetionAdapter;
+
 import com.example.mumo.scara.model.Question;
 import com.example.mumo.scara.viewmodel.MainActivityViewModel;
 import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.firestore.SnapshotParser;
 import com.firebase.ui.firestore.paging.FirestorePagingOptions;
 import com.firebase.ui.firestore.paging.LoadingState;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,FirestorePagingQuetionAdapter.OnImageClickListener {
 
     private static final int RC_SIGN_IN = 123;
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -92,7 +99,15 @@ public class MainActivity extends AppCompatActivity
 
         final FirestorePagingOptions<Question> options = new FirestorePagingOptions.Builder <Question>()
                 .setLifecycleOwner(this)
-                .setQuery(query,config, Question.class)
+                .setQuery(query, config, new SnapshotParser<Question>() {
+                    @NonNull
+                    @Override
+                    public Question parseSnapshot(@NonNull DocumentSnapshot snapshot) {
+                        Question  question = snapshot.toObject(Question.class);
+                        question.setQuestionId(snapshot.getId());
+                        return  question;
+                    }
+                })
                 .build();
 
         mQuestionRecyclerView = findViewById(R.id.question_recylerview);
@@ -102,7 +117,7 @@ public class MainActivity extends AppCompatActivity
 
         mQuestionRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        final FirestorePagingQuetionAdapter adapter = new FirestorePagingQuetionAdapter(options, this){
+        final FirestorePagingQuetionAdapter adapter = new FirestorePagingQuetionAdapter(options, this, this){
             @Override
             protected void onLoadingStateChanged(@NonNull LoadingState state) {
                 switch (state) {
@@ -240,4 +255,11 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    @Override
+    public void openImageFullScreenDialog(String imageRef) {
+
+        Intent intent = new Intent(this, PhotoDisplayActivity.class);
+        intent.putExtra("imageRef", imageRef);
+        startActivity(intent);
+    }
 }

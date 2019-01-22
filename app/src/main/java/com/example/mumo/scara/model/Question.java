@@ -4,27 +4,32 @@ import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.ServerTimestamp;
 
 import java.util.Date;
+import java.util.List;
 
 public class Question {
     private String questionId;
     private String text;
     private String username;
     private String category;
-    private int votes;
+
     private int answers;
     private String imageReference;
     private long createdAt;
+    private List<String> votes;
+
+
 
     public Question() {}
 
-    public Question(String text, String username, String category, int votes, String url, int answers, long createdAt) {
+    public Question(String text, String username, String category, String url,List<String> votes, int answers, long createdAt) {
         this.text = text;
         this.username = username;
         this.category = category;
-        this.votes = votes;
+
         this.imageReference = url;
         this.createdAt = createdAt;
         this.answers =answers;
+        this.votes = votes;
     }
 
     @Exclude
@@ -60,13 +65,6 @@ public class Question {
         this.category = category;
     }
 
-    public int getVotes() {
-        return votes;
-    }
-
-    public void setVotes(int votes) {
-        this.votes = votes;
-    }
 
     public String getImageReference() {
         return imageReference;
@@ -90,5 +88,13 @@ public class Question {
 
     public void setAnswers(int answers) {
         this.answers = answers;
+    }
+
+    public List<String> getVotes() {
+        return votes;
+    }
+
+    public void setVotes(List<String> votes) {
+        this.votes = votes;
     }
 }
