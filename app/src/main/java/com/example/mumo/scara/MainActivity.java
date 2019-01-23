@@ -125,24 +125,26 @@ public class MainActivity extends AppCompatActivity
                         // The initial load has begun
                         // ...
                         mLoadingIndicator.setVisibility(View.VISIBLE);
-                        mErrorTextView.setVisibility(View.GONE);
-                        mRetryButton.setVisibility(View.GONE);
-                        mQuestionRecyclerView.setVisibility(View.GONE);
+//                        mErrorTextView.setVisibility(View.GONE);
+//                        mRetryButton.setVisibility(View.GONE);
+//                        mQuestionRecyclerView.setVisibility(View.GONE);
+
                     case LOADING_MORE:
                         // The adapter has started to load an additional page
                         // ...
                         mLoadingIndicator.setVisibility(View.VISIBLE);
-                        mErrorTextView.setVisibility(View.GONE);
-                        mRetryButton.setVisibility(View.GONE);
-                        mQuestionRecyclerView.setVisibility(View.VISIBLE);
+//                        mErrorTextView.setVisibility(View.GONE);
+//                        mRetryButton.setVisibility(View.GONE);
+//                        mQuestionRecyclerView.setVisibility(View.VISIBLE);
                     case LOADED:
                         // The previous load (either initial or additional) completed
                         // ...
-                        mLoadingIndicator.setVisibility(View.GONE);
-                        mQuestionRecyclerView.setVisibility(View.VISIBLE);
-                        mLoadingIndicator.setVisibility(View.GONE);
-                        mErrorTextView.setVisibility(View.GONE);
-                        mRetryButton.setVisibility(View.GONE);
+                        mLoadingIndicator.setVisibility(View.INVISIBLE);
+//                        mQuestionRecyclerView.setVisibility(View.VISIBLE);
+//                        mLoadingIndicator.setVisibility(View.GONE);
+//                        mErrorTextView.setVisibility(View.GONE);
+//                        mRetryButton.setVisibility(View.GONE);
+
 
                     case ERROR:
                         // The previous load (either initial or additional) failed. Call
